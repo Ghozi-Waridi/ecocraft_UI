@@ -25,10 +25,7 @@ class UserStatsCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppConstants.paddingLarge),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            cardColor,
-            cardColor.withOpacity(0.8),
-          ],
+          colors: [cardColor, cardColor.withOpacity(0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -42,7 +39,7 @@ class UserStatsCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Icon
@@ -52,13 +49,11 @@ class UserStatsCard extends StatelessWidget {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.textLight,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppColors.textLight, size: 24),
           ),
-          
+
+          const SizedBox(height: AppConstants.paddingSmall),
+
           // Title and Value
           Flexible(
             child: Column(
@@ -73,18 +68,22 @@ class UserStatsCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: AppTextStyles.h1.copyWith(
-                    color: AppColors.textLight,
-                    fontSize: 28,
+                const SizedBox(height: 2),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: AppTextStyles.h1.copyWith(
+                        color: AppColors.textLight,
+                        fontSize: 28,
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle!,
                     style: AppTextStyles.caption.copyWith(

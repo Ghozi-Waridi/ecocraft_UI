@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-// import '../utils/constants.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/constants.dart';
+import '../admin/admin_dashboard.dart';
+import '../user/user_dashboard.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -34,14 +37,35 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to login after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-      }
-    });
+    // Try auto login
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // Wait for animation
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final isLoggedIn = await authProvider.tryAutoLogin();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // Navigate to dashboard based on role
+      final isAdmin = authProvider.isAdmin;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => isAdmin ? const AdminDashboard() : const UserDashboard(),
+        ),
+      );
+    } else {
+      // Navigate to login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   @override

@@ -41,6 +41,9 @@ dependencies:
   # State management
   provider: ^6.1.2
   
+  # Local storage
+  shared_preferences: ^2.2.0
+  
   # Environment variables
   flutter_dotenv: ^5.1.0
   
@@ -49,6 +52,9 @@ dependencies:
   
   # HTTP client
   http: ^1.2.0
+
+  # QR Code Scanner
+  mobile_scanner: ^5.2.3
 
 dev_dependencies:
   flutter_test:

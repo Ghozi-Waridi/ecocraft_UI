@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 import '../models/user_model.dart';
 import '../models/leaderboard_entry.dart';
@@ -25,9 +26,7 @@ class UserService {
   /// Get leaderboard (top 10 users)
   Future<List<LeaderboardEntry>> getLeaderboard() async {
     try {
-      final response = await _supabase
-          .from('leaderboard')
-          .select();
+      final response = await _supabase.from('leaderboard').select();
 
       return (response as List)
           .map((json) => LeaderboardEntry.fromJson(json))
@@ -64,10 +63,10 @@ class UserService {
   /// Increment user's bottle count
   Future<bool> incrementBottles(String username, {int amount = 1}) async {
     try {
-      await _supabase.rpc('increment_bottles', params: {
-        'user_username': username,
-        'amount': amount,
-      });
+      await _supabase.rpc(
+        'increment_bottles',
+        params: {'user_username': username, 'amount': amount},
+      );
       return true;
     } catch (e) {
       print('Increment bottles error: $e');
@@ -92,10 +91,8 @@ class UserService {
   /// Get total number of users
   Future<int> getTotalUsersCount() async {
     try {
-      final response = await _supabase
-          .from('users')
-          .select('id');
-      
+      final response = await _supabase.from('users').select('id');
+
       return (response as List).length;
     } catch (e) {
       print('Get total users count error: $e');
@@ -106,9 +103,7 @@ class UserService {
   /// Get total bottles collected across all users
   Future<int> getTotalBottlesCollected() async {
     try {
-      final response = await _supabase
-          .from('users')
-          .select('total_bottles');
+      final response = await _supabase.from('users').select('total_bottles');
 
       int total = 0;
       for (var user in response as List) {
@@ -124,10 +119,7 @@ class UserService {
   /// Delete user (admin only)
   Future<bool> deleteUser(String userId) async {
     try {
-      await _supabase
-          .from('users')
-          .delete()
-          .eq('id', userId);
+      await _supabase.from('users').delete().eq('id', userId);
       return true;
     } catch (e) {
       print('Delete user error: $e');
@@ -161,6 +153,42 @@ class UserService {
     } catch (e) {
       print('Update user error: $e');
       return null;
+    }
+  }
+
+  /// Connect to Smart Bin via Supabase Realtime
+  Future<bool> connectToBin({
+    required String binId,
+    required String userId,
+    required String username,
+    required String fullName,
+  }) async {
+    try {
+      final channel = _supabase.channel('bin_sessions:$binId');
+
+      // Subscribe to channel and send broadcast message
+      channel.subscribe((status, [error]) {
+        if (status == RealtimeSubscribeStatus.subscribed) {
+          // Send user data to the bin via broadcast
+          channel.sendBroadcastMessage(
+            event: 'user_connected',
+            payload: {
+              'user_id': userId,
+              'username': username,
+              'full_name': fullName,
+            },
+          );
+        }
+      });
+
+      // Wait a bit to ensure message is sent before unsubscribing
+      await Future.delayed(const Duration(seconds: 2));
+      await _supabase.removeChannel(channel);
+
+      return true;
+    } catch (e) {
+      print('Connect to bin error: $e');
+      return false;
     }
   }
 }
